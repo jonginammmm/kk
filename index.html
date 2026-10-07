@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#050509">
+<title>BU SAHIFA SEN UCHUN</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#050509;
+    color:#fff;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "Segoe UI",
+        sans-serif;
+}
+
+body{
+    touch-action:none;
+}
+
+button{
+    font:inherit;
+}
+
+#background{
+    position:fixed;
+    inset:0;
+    z-index:-20;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(0,0,0,.15),
+            rgba(0,0,0,.78)
+        ),
+        url("background.jpg") center/cover no-repeat;
+    transform:scale(1.06);
+    filter:saturate(.85) contrast(1.08);
+    animation:backgroundMove 18s ease-in-out infinite alternate;
+}
+
+@keyframes backgroundMove{
+    from{transform:scale(1.06)}
+    to{transform:scale(1.13)}
+}
+
+#noise{
+    position:fixed;
+    inset:0;
+    z-index:-10;
+    opacity:.055;
+    pointer-events:none;
+    background-image:
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");
+}
+
+#blackout{
+    position:fixed;
+    inset:0;
+    z-index:50;
+    background:#000;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 1.2s ease;
+}
+
+#canvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:1;
+    pointer-events:none;
+}
+
+#ui{
+    position:fixed;
+    inset:0;
+    z-index:5;
+}
+
+/* TOP */
+
+.top{
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    padding:
+        calc(17px + env(safe-area-inset-top))
+        18px
+        12px;
+
+    display:flex;
+    justify-content:space-between;
+
+    font-size:9px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+
+    color:rgba(255,255,255,.42);
+}
+
+#time{
+    font-variant-numeric:tabular-nums;
+}
+
+/* START */
+
+#start{
+    position:absolute;
+    inset:0;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    text-align:center;
+
+    padding:25px;
+
+    transition:
+        opacity 1s ease,
+        transform 1s ease;
+}
+
+.start-small{
+    font-size:9px;
+    letter-spacing:.42em;
+    color:rgba(255,255,255,.42);
+    margin-bottom:28px;
+}
+
+.start-title{
+    font-size:
+        clamp(44px,14vw,90px);
+
+    line-height:.86;
+
+    letter-spacing:-.085em;
+
+    max-width:600px;
+}
+
+.start-title span{
+    display:block;
+}
+
+.start-sub{
+    max-width:340px;
+
+    margin-top:27px;
+
+    font-size:13px;
+    line-height:1.8;
+
+    color:rgba(255,255,255,.65);
+}
+
+.enter{
+    margin-top:38px;
+
+    padding:14px 25px;
+
+    border-radius:100px;
+
+    color:#fff;
+
+    background:rgba(255,255,255,.075);
+
+    border:
+        1px solid
+        rgba(255,255,255,.22);
+
+    backdrop-filter:blur(15px);
+    -webkit-backdrop-filter:blur(15px);
+
+    transition:.3s;
+
+    letter-spacing:.02em;
+}
+
+.enter:active{
+    transform:scale(.92);
+}
+
+/* WORLD */
+
+#world{
+    position:absolute;
+    inset:0;
+
+    opacity:0;
+    visibility:hidden;
+
+    transition:opacity 1.2s ease;
+}
+
+#world.active{
+    opacity:1;
+    visibility:visible;
+}
+
+/* CENTER OBJECT */
+
+#orb{
+    position:absolute;
+
+    width:74px;
+    height:74px;
+
+    left:50%;
+    top:50%;
+
+    transform:
+        translate(-50%,-50%);
+
+    border-radius:50%;
+
+    background:
+        radial-gradient(
+            circle at 35% 30%,
+            #fff,
+            rgba(255,255,255,.72) 9%,
+            rgba(255,255,255,.15) 25%,
+            rgba(255,255,255,.02) 60%,
+            transparent 72%
+        );
+
+    box-shadow:
+        0 0 25px rgba(255,255,255,.3),
+        0 0 100px rgba(255,255,255,.15);
+
+    opacity:.75;
+
+    transition:
+        width .6s ease,
+        height .6s ease,
+        opacity .6s ease,
+        box-shadow .6s ease;
+}
+
+#orb.hot{
+    width:105px;
+    height:105px;
+    opacity:1;
+
+    box-shadow:
+        0 0 35px rgba(255,255,255,.5),
+        0 0 130px rgba(255,255,255,.3);
+}
+
+/* HINT */
+
+#hint{
+    position:absolute;
+
+    left:50%;
+    bottom:
+        calc(55px + env(safe-area-inset-bottom));
+
+    transform:translateX(-50%);
+
+    width:max-content;
+    max-width:90%;
+
+    text-align:center;
+
+    font-size:11px;
+    letter-spacing:.08em;
+
+    color:rgba(255,255,255,.52);
+
+    transition:opacity .6s ease;
+}
+
+/* SECRET WORD */
+
+#secret{
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    transform:
+        translate(-50%,-50%)
+        scale(.8);
+
+    width:calc(100% - 40px);
+    max-width:500px;
+
+    text-align:center;
+
+    opacity:0;
+    pointer-events:none;
+
+    transition:
+        opacity .8s ease,
+        transform .8s cubic-bezier(.2,.8,.2,1);
+}
+
+#secret.show{
+    opacity:1;
+    transform:
+        translate(-50%,-50%)
+        scale(1);
+}
+
+.secret-label{
+    font-size:8px;
+    letter-spacing:.35em;
+    color:rgba(255,255,255,.35);
+    margin-bottom:17px;
+}
+
+.secret-word{
+    font-size:
+        clamp(42px,13vw,78px);
+
+    line-height:.9;
+
+    letter-spacing:-.07em;
+}
+
+.secret-desc{
+    margin-top:20px;
+
+    font-size:14px;
+    line-height:1.8;
+
+    color:rgba(255,255,255,.7);
+}
+
+/* MEMORY */
+
+#memory{
+    position:absolute;
+    inset:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:25px;
+
+    opacity:0;
+    pointer-events:none;
+
+    transition:opacity 1s ease;
+}
+
+#memory.show{
+    opacity:1;
+    pointer-events:auto;
+}
+
+.memory-card{
+    width:100%;
+    max-width:540px;
+
+    padding:30px 23px;
+
+    border-radius:32px;
+
+    background:
+        rgba(255,255,255,.055);
+
+    border:
+        1px solid
+        rgba(255,255,255,.14);
+
+    backdrop-filter:blur(25px);
+    -webkit-backdrop-filter:blur(25px);
+
+    box-shadow:
+        0 30px 100px rgba(0,0,0,.5);
+}
+
+.memory-index{
+    font-size:9px;
+    letter-spacing:.3em;
+    color:rgba(255,255,255,.35);
+}
+
+.memory-title{
+    margin-top:22px;
+
+    font-size:
+        clamp(30px,9vw,53px);
+
+    line-height:.95;
+
+    letter-spacing:-.065em;
+}
+
+.memory-text{
+    margin-top:24px;
+
+    font-size:15px;
+    line-height:1.9;
+
+    color:rgba(255,255,255,.78);
+}
+
+.memory-button{
+    margin-top:28px;
+
+    padding:12px 19px;
+
+    border-radius:100px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.2);
+
+    color:#fff;
+
+    background:
+        rgba(255,255,255,.09);
+}
+
+/* CHOICES */
+
+#choice{
+    position:absolute;
+    inset:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:20px;
+
+    opacity:0;
+    pointer-events:none;
+
+    transition:opacity .8s ease;
+}
+
+#choice.show{
+    opacity:1;
+    pointer-events:auto;
+}
+
+.choice-inner{
+    width:100%;
+    max-width:520px;
+}
+
+.choice-label{
+    font-size:8px;
+    letter-spacing:.35em;
+    color:rgba(255,255,255,.35);
+}
+
+.choice-title{
+    margin-top:17px;
+
+    font-size:
+        clamp(31px,9vw,58px);
+
+    line-height:.95;
+    letter-spacing:-.07em;
+}
+
+.choice-grid{
+    margin-top:30px;
+
+    display:grid;
+    grid-template-columns:1fr 1fr;
+
+    gap:10px;
+}
+
+.choice-button{
+    min-height:90px;
+
+    text-align:left;
+
+    padding:17px;
+
+    border-radius:23px;
+
+    color:#fff;
+
+    border:
+        1px solid
+        rgba(255,255,255,.14);
+
+    background:
+        rgba(255,255,255,.055);
+
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+
+    transition:.25s;
+}
+
+.choice-button:active{
+    transform:scale(.94);
+}
+
+.choice-button b{
+    display:block;
+    font-size:16px;
+}
+
+.choice-button small{
+    display:block;
+    margin-top:8px;
+
+    color:rgba(255,255,255,.42);
+    font-size:10px;
+}
+
+/* ANSWER */
+
+#answer{
+    position:absolute;
+    inset:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:25px;
+
+    opacity:0;
+    pointer-events:none;
+
+    transition:opacity .8s ease;
+}
+
+#answer.show{
+    opacity:1;
+}
+
+.answer-text{
+    max-width:550px;
+
+    text-align:center;
+
+    font-family:
+        "Segoe Print",
+        "Bradley Hand",
+        cursive;
+
+    font-size:
+        clamp(20px,6vw,34px);
+
+    line-height:1.65;
+}
+
+/* FINAL */
+
+#final{
+    position:absolute;
+    inset:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:24px;
+
+    opacity:0;
+    visibility:hidden;
+
+    transition:
+        opacity 1.4s ease;
+}
+
+#final.show{
+    opacity:1;
+    visibility:visible;
+}
+
+.final-inner{
+    width:100%;
+    max-width:650px;
+
+    text-align:center;
+}
+
+.final-line{
+    font-size:9px;
+    letter-spacing:.38em;
+    color:rgba(255,255,255,.35);
+}
+
+.final-title{
+    margin-top:25px;
+
+    font-size:
+        clamp(43px,13vw,82px);
+
+    line-height:.88;
+
+    letter-spacing:-.085em;
+}
+
+.final-message{
+    margin:29px auto 0;
+
+    max-width:510px;
+
+    font-family:
+        "Segoe Print",
+        "Bradley Hand",
+        cursive;
+
+    font-size:15px;
+    line-height:2;
+
+    color:rgba(255,255,255,.82);
+}
+
+.final-sign{
+    margin-top:28px;
+
+    font-size:11px;
+
+    color:rgba(255,255,255,.45);
+}
+
+/* RESTART */
+
+.restart{
+    margin-top:30px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.15);
+
+    background:
+        rgba(255,255,255,.06);
+
+    color:#fff;
+
+    border-radius:100px;
+
+    padding:11px 18px;
+
+    font-size:11px;
+}
+
+/* FLASH */
+
+#flash{
+    position:fixed;
+    inset:0;
+    z-index:100;
+
+    background:white;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:opacity .2s;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:390px){
+
+    .choice-button{
+        min-height:82px;
+        padding:14px;
+    }
+
+    .choice-button b{
+        font-size:14px;
+    }
+
+    .memory-card{
+        padding:25px 19px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="background"></div>
+<div id="noise"></div>
+<div id="blackout"></div>
+<div id="flash"></div>
+
+<canvas id="canvas"></canvas>
+
+<div id="ui">
+
+    <div class="top">
+        <span>PRIVATE EXPERIENCE</span>
+        <span id="time">00:00</span>
+    </div>
+
+
+    <!-- START -->
+
+    <div id="start">
+
+        <div class="start-small">
+            BU SAHIFA ODDIY EMAS
+        </div>
+
+        <div class="start-title">
+            <span>hammasini</span>
+            <span>unut.</span>
+            <span>faqat kir.</span>
+        </div>
+
+        <div class="start-sub">
+            Bu yerda hech qanday “keyingi” tugmasi yo‘q.
+            O‘zing topasan.
+        </div>
+
+        <button class="enter" onclick="begin()">
+            Kirish
+        </button>
+
+    </div>
+
+
+    <!-- WORLD -->
+
+    <div id="world">
+
+        <div id="orb"></div>
+
+        <div id="hint">
+            markazdagi yorug‘likka teg
+        </div>
+
+        <div id="secret">
+
+            <div class="secret-label">
+                SEN BIRINCHI SIRNI TOPDING
+            </div>
+
+            <div class="secret-word">
+                SEN.
+            </div>
+
+            <div class="secret-desc">
+                Ba'zan eng kerakli javob
+                juda uzoqda bo‘lmaydi.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- MEMORY -->
+
+    <div id="memory">
+
+        <div class="memory-card">
+
+            <div class="memory-index">
+                01 / UNUTILGAN NARSA
+            </div>
+
+            <div class="memory-title">
+                Sen bugun
+                hammasini
+                yaxshi qilishga
+                majbur emassan.
+            </div>
+
+            <div class="memory-text">
+                Agar bugun kayfiyating yo‘q bo‘lsa —
+                mayli.
+
+                Agar hech kim bilan gaplashging
+                kelmasa — mayli.
+
+                Agar shunchaki jim o‘tirging
+                kelsa ham — mayli.
+
+                Faqat o‘zingni buning uchun
+                yomon ko‘rma.
+            </div>
+
+            <button class="memory-button" onclick="memoryNext()">
+                davom et
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- CHOICE -->
+
+    <div id="choice">
+
+        <div class="choice-inner">
+
+            <div class="choice-label">
+                02 / KICHKINA TANLOV
+            </div>
+
+            <div class="choice-title">
+                Agar hozir bir
+                narsani tanlash
+                mumkin bo‘lsa...
+            </div>
+
+            <div class="choice-grid">
+
+                <button class="choice-button"
+                        onclick="answer(0)">
+                    <b>Jimlik</b>
+                    <small>hech kim bezovta qilmasin</small>
+                </button>
+
+                <button class="choice-button"
+                        onclick="answer(1)">
+                    <b>Kulgi</b>
+                    <small>bugun biroz yengillik kerak</small>
+                </button>
+
+                <button class="choice-button"
+                        onclick="answer(2)">
+                    <b>Suhbat</b>
+                    <small>kimdir shunchaki tinglasin</small>
+                </button>
+
+                <button class="choice-button"
+                        onclick="answer(3)">
+                    <b>Hech narsa</b>
+                    <small>faqat vaqt kerak</small>
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ANSWER -->
+
+    <div id="answer">
+
+        <div class="answer-text" id="answerText"></div>
+
+    </div>
+
+
+    <!-- FINAL -->
+
+    <div id="final">
+
+        <div class="final-inner">
+
+            <div class="final-line">
+                EXPERIENCE COMPLETE
+            </div>
+
+            <div class="final-title">
+                Mana.
+                <br>
+                yetib keldik.
+            </div>
+
+            <div class="final-message" id="finalMessage"></div>
+
+            <div class="final-sign">
+                Bugun sen uchun yaratilgan kichkina joy.
+            </div>
+
+            <button class="restart" onclick="location.reload()">
+                boshidan ko‘rish
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   CLOCK
+========================================================= */
+
+function updateTime(){
+
+    const d=new Date();
+
+    const h=
+        String(d.getHours()).padStart(2,"0");
+
+    const m=
+        String(d.getMinutes()).padStart(2,"0");
+
+    document.getElementById("time")
+        .textContent=h+":"+m;
+}
+
+updateTime();
+
+setInterval(updateTime,1000);
+
+
+/* =========================================================
+   CANVAS BACKGROUND
+========================================================= */
+
+const canvas=
+    document.getElementById("canvas");
+
+const ctx=
+    canvas.getContext("2d");
+
+let W=0;
+let H=0;
+
+let stars=[];
+
+function resize(){
+
+    W=window.innerWidth;
+    H=window.innerHeight;
+
+    const d=
+        Math.min(
+            window.devicePixelRatio||1,
+            1.5
+        );
+
+    canvas.width=W*d;
+    canvas.height=H*d;
+
+    canvas.style.width=W+"px";
+    canvas.style.height=H+"px";
+
+    ctx.setTransform(d,0,0,d,0,0);
+
+    stars=[];
+
+    for(let i=0;i<90;i++){
+
+        stars.push({
+
+            x:Math.random()*W,
+            y:Math.random()*H,
+
+            r:Math.random()*1.4+.2,
+
+            a:Math.random()*.5+.1,
+
+            speed:
+                Math.random()*.003+.001
+
+        });
+
+    }
+}
+
+resize();
+
+window.addEventListener(
+    "resize",
+    resize
+);
+
+
+function drawStars(){
+
+    ctx.clearRect(0,0,W,H);
+
+    const now=performance.now();
+
+    stars.forEach(s=>{
+
+        const a=
+            s.a+
+            Math.sin(now*s.speed)*.12;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            s.x,
+            s.y,
+            s.r,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fillStyle=
+            "rgba(255,255,255,"+
+            a+
+            ")";
+
+        ctx.fill();
+
+    });
+
+    requestAnimationFrame(drawStars);
+}
+
+drawStars();
+
+
+/* =========================================================
+   BEGIN
+========================================================= */
+
+let started=false;
+
+function begin(){
+
+    if(started)return;
+
+    started=true;
+
+    const start=
+        document.getElementById("start");
+
+    start.style.opacity="0";
+    start.style.transform="scale(1.08)";
+
+    setTimeout(()=>{
+
+        start.style.display="none";
+
+        document
+            .getElementById("world")
+            .classList.add("active");
+
+    },1000);
+
+}
+
+
+/* =========================================================
+   ORB INTERACTION
+========================================================= */
+
+const orb=
+    document.getElementById("orb");
+
+const hint=
+    document.getElementById("hint");
+
+const secret=
+    document.getElementById("secret");
+
+let orbTouches=0;
+
+function orbTouch(e){
+
+    e.preventDefault();
+
+    orbTouches++;
+
+    orb.classList.add("hot");
+
+    hint.style.opacity="0";
+
+    createShock(
+        window.innerWidth/2,
+        window.innerHeight/2
+    );
+
+    if(orbTouches===1){
+
+        setTimeout(()=>{
+
+            orb.classList.remove("hot");
+
+        },450);
+
+    }
+
+    if(orbTouches>=3){
+
+        revealSecret();
+
+    }
+
+}
+
+orb.addEventListener(
+    "touchstart",
+    orbTouch,
+    {passive:false}
+);
+
+orb.addEventListener(
+    "mousedown",
+    orbTouch
+);
+
+
+function revealSecret(){
+
+    orb.style.opacity="0";
+    hint.style.opacity="0";
+
+    setTimeout(()=>{
+
+        secret.classList.add("show");
+
+    },350);
+
+    setTimeout(()=>{
+
+        secret.classList.remove("show");
+
+        setTimeout(()=>{
+
+            document
+                .getElementById("memory")
+                .classList.add("show");
+
+        },800);
+
+    },3300);
+
+}
+
+
+/* =========================================================
+   SHOCKWAVE
+========================================================= */
+
+let waves=[];
+
+function createShock(x,y){
+
+    waves.push({
+        x:x,
+        y:y,
+        r:5,
+        a:.55
+    });
+
+}
+
+function drawWaves(){
+
+    waves.forEach((w,i)=>{
+
+        w.r+=3.2;
+        w.a-=.014;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            w.x,
+            w.y,
+            w.r,
+            0,
+            Math.PI*2
+        );
+
+        ctx.strokeStyle=
+            "rgba(255,255,255,"+
+            w.a+
+            ")";
+
+        ctx.lineWidth=1;
+
+        ctx.stroke();
+
+        if(w.a<=0){
+            waves.splice(i,1);
+        }
+
+    });
+
+    requestAnimationFrame(drawWaves);
+}
+
+drawWaves();
+
+
+/* =========================================================
+   MEMORY
+========================================================= */
+
+function memoryNext(){
+
+    document
+        .getElementById("memory")
+        .classList.remove("show");
+
+    setTimeout(()=>{
+
+        document
+            .getElementById("choice")
+            .classList.add("show");
+
+    },650);
+
+}
+
+
+/* =========================================================
+   ANSWERS
+========================================================= */
+
+const answers=[
+
+`Unda unda...
+
+Bugun jimlik kerak bo‘lsa,
+jimlik bo‘lsin.
+
+Men seni gapirishga majburlamayman.
+
+Lekin bilib qo‘y:
+jimlikning o‘zi ham yolg‘izlik degani emas.`,
+
+`Mana shu javob menga yoqdi.
+
+Chunki ba'zan katta muammolarning
+eng yaxshi yechimi —
+
+bir marta chin dildan kulish.
+
+Shuning uchun bugun hech bo‘lmasa
+bitta tabassumni o‘g‘irlab ketaman.`,
+
+`Unda gaplashamiz.
+
+Lekin men senga nasihat qilmayman.
+
+Faqat tinglayman.
+
+Chunki ba'zan odamga yechim emas,
+“men seni tushundim” degan gap kerak.`,
+
+`Mayli.
+
+Hech narsa qilmaymiz.
+
+Bugun vaqt o‘z ishini qilsin.
+
+Sen esa faqat o‘zingni asra.
+
+Men esa bu kichkina sahifani
+senga esdalik qilib qoldiraman.`
+];
+
+
+function answer(i){
+
+    document
+        .getElementById("choice")
+        .classList.remove("show");
+
+    const ans=
+        document.getElementById("answer");
+
+    const txt=
+        document.getElementById("answerText");
+
+    ans.classList.add("show");
+
+    typeText(
+        txt,
+        answers[i],
+        28,
+        ()=>{
+
+            setTimeout(()=>{
+
+                ans.classList.remove("show");
+
+                setTimeout(
+                    finalPage,
+                    900
+                );
+
+            },1800);
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   TYPEWRITER
+========================================================= */
+
+let typingTimer=null;
+
+function typeText(
+    element,
+    text,
+    speed,
+    done
+){
+
+    if(typingTimer)
+        clearInterval(typingTimer);
+
+    element.textContent="";
+
+    let i=0;
+
+    typingTimer=
+        setInterval(()=>{
+
+            element.textContent=
+                text.slice(0,i);
+
+            i++;
+
+            if(i>text.length){
+
+                clearInterval(
+                    typingTimer
+                );
+
+                if(done)done();
+
+            }
+
+        },speed);
+
+}
+
+
+/* =========================================================
+   FINAL PAGE
+========================================================= */
+
+function finalPage(){
+
+    document
+        .getElementById("blackout")
+        .style.opacity=".88";
+
+    setTimeout(()=>{
+
+        document
+            .getElementById("world")
+            .style.opacity="0";
+
+        document
+            .getElementById("final")
+            .classList.add("show");
+
+        document
+            .getElementById("blackout")
+            .style.opacity="0";
+
+        typeText(
+
+            document.getElementById(
+                "finalMessage"
+            ),
+
+`Bugun seni xursand qilish uchun
+katta narsalar kerak deb o‘ylamadim.
+
+Na gul kerak,
+na yuzlab gap.
+
+Ba'zan insonning kunini
+o‘zgartirish uchun
+
+“men seni o‘yladim”
+
+degan bitta kichkina sabab
+yetarli bo‘ladi.
+
+Shuning uchun bu sahifa
+faqat sen uchun.
+
+Agar oxirigacha yetib kelgan bo‘lsang,
+demak bugungi kichkina missiyam
+bajarildi.
+
+Endi esa...
+
+telefonni bir chetga qo‘y,
+chuqur nafas ol
+va o‘zingga ozgina mehr ber.
+
+Sen bunga loyiqsan.`,
+
+            32
+
+        );
+
+    },1100);
+
+}
+
+
+/* =========================================================
+   BACKGROUND TOUCH LIGHT
+========================================================= */
+
+document.addEventListener(
+    "touchmove",
+    e=>{
+
+        if(!started)return;
+
+        const t=e.touches[0];
+
+        createShock(
+            t.clientX,
+            t.clientY
+        );
+
+    },
+    {passive:true}
+);
+
+
+/* =========================================================
+   KEYBOARD SUPPORT
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    e=>{
+
+        if(
+            e.key==="Enter" &&
+            !started
+        ){
+
+            begin();
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+  </html>
